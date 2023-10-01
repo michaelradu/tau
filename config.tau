@@ -1,0 +1,21 @@
+# Edit welcome message because why the fuck not
+prompt = "Tau editor -- version %s | ReHacked 2023 Edition"
+line-format=1 # 0 = line/total-lines, 1 = percentage
+# Tab spaces, WIP
+tab-length=2
+# Number of times to quit, WIP
+quit-cnt=2
+
+
+
+## THIS IS A TODO
+# Add Language Support
+## Adding Language Keywords
+# C_HL_keywords='"switch", "if", "while", "for", "break", "continue", "return", "else", "struct", "union", "typedef", "static", "enum", "class", "case", "int|", "long|", "double|", "float|", "char|", "unsigned|", "signed|", "void|"'
+
+## Adding File Extensions
+# C_HL_extensions = '".c", ".h", ".cpp"'
+
+
+
+
