@@ -1,0 +1,21 @@
+         NNXXXXXXXXXXXXXXXXXXXXXXXKK0X\n  
+      X0OkxdxxxxxddxxxxxxxxxxxxxddddkX\n  
+    XOxdddddooddddddddddddddddddddx0N\n   
+  XOxddxxxxxxxdddddddxxdddddddxxk0N\n     
+  KkOKXNNNNNNXkddodOKXXXXXXXXXXN\n        
+             Nkdddd0N\n                   
+             Xkdddd0N\n                   
+             Kxdddd0\n                    
+             0ddddd0\n                    
+            NOddddxK\n                    
+            NkddddxK\n                    
+            XkddddxK\n                    
+            KxddddxK\n                    
+            Kxddddd0N\n                   
+            KxdddddOXN\n                  
+            KxdddddxOK        NNXN\n      
+            Xkdddddddx0XXXXK0OkxkK\n      
+            N0ddddddodddddddddk0XN\n
+             NOdddddodddddxk0X\n
+              N0kxxxxxxkOKX\n
+                 NXXXNN\n

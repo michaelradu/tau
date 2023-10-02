@@ -1,0 +1,21 @@
+         NNXXXXXXXXXXXXXXXXXXXXXXXKK0X  
+      X0OkxdxxxxxddxxxxxxxxxxxxxddddkX  
+    XOxdddddooddddddddddddddddddddx0N   
+  XOxddxxxxxxxdddddddxxdddddddxxk0N     
+  KkOKXNNNNNNXkddodOKXXXXXXXXXXN        
+             Nkdddd0N                   
+             Xkdddd0N                   
+             Kxdddd0                    
+             0ddddd0                    
+            NOddddxK                    
+            NkddddxK                    
+            XkddddxK                    
+            KxddddxK                    
+            Kxddddd0N                   
+            KxdddddOXN                  
+            KxdddddxOK        NNXN      
+            Xkdddddddx0XXXXK0OkxkK      
+            N0ddddddodddddddddk0XN
+             NOdddddodddddxk0X
+              N0kxxxxxxkOKX
+                 NXXXNN

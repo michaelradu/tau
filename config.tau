@@ -1,10 +1,12 @@
+# Add a logo like Neovim and Emacs
+#logo=/home/mihai/Desktop/TauFinal/art2.md
 # Edit welcome message because why the fuck not
 prompt = "Tau editor -- version %s | ReHacked 2023 Edition"
 line-format=1 # 0 = line/total-lines, 1 = percentage
 # Tab spaces, WIP
 tab-length=2
 # Number of times to quit, WIP
-quit-cnt=2
+# quit-cnt=2
 
 
 

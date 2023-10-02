@@ -156,12 +156,41 @@ char *trim_garbage(char *str) {
 // TODO(mihai): organize this further so you don't have the welcomeMsg here, but
 // as a const
 
-// This is shit, but it works and I am coding this while in a classroom full of
-// idiots so it's fine.
+// This is shit, but it works.
+//
+//
+// TODO(mihai): FIXME
+char LOGO[21][41] = {{"      NNXXXXXXXXXXXXXXXXXXXXXXXKK0X  \n"},
+                     {"    X0OkxdxxxxxddxxxxxxxxxxxxxddddkX  \n"},
+                     {"  XOxdddddooddddddddddddddddddddx0N   \n"},
+                     {"XOxddxxxxxxxdddddddxxdddddddxxk0N     \n"},
+                     {"KkOKXNNNNNNXkddodOKXXXXXXXXXXN        \n"},
+                     {"             Nkdddd0N                   \n"},
+                     {"             Xkdddd0N                   \n"},
+                     {"             Kxdddd0                    \n"},
+                     {"             0ddddd0                    \n"},
+                     {"            NOddddxK                    \n"},
+                     {"            NkddddxK                    \n"},
+                     {"            XkddddxK                    \n"},
+                     {"            KxddddxK                    \n"},
+                     {"            Kxddddd0N                   \n"},
+                     {"            KxdddddOXN                  \n"},
+                     {"            KxdddddxOK        NNXN      \n"},
+                     {"            Xkdddddddx0XXXXK0OkxkK      \n"},
+                     {"            N0ddddddodddddddddk0XN      \n"},
+                     {"             NOdddddodddddxk0X          \n"},
+                     {"              N0kxxxxxxkOKX             \n"},
+                     {"                 NXXXNN                \n"}};
+
 char WELCOME_PROMPT[256] = "Tau editor -- version %s";
 size_t TAB_LENGTH = TAU_TAB_STOP;
 size_t QUIT_CNT = TAU_QUIT_TIMES;
 size_t LINE_FORMAT = 0;
+
+int num_rows = 256;
+int num_cols = 256;
+
+void die(const char *s);
 
 // Load and parse the config file
 void load_config() {
@@ -188,6 +217,41 @@ void load_config() {
         char *trimmed_key = trim_garbage(key);
 
         // Handle shell prompt setting
+        /*if (strcmp(trimmed_key, "logo") == 0) {
+          char *trimmed_value = trim_garbage(value);
+          FILE *file = fopen(trimmed_value, "rb");
+          if (file == NULL)
+            die("fopen");
+          fseek(file, 0, SEEK_END);
+          long size = ftell(file);
+          rewind(file);
+          char *data = (char *)malloc(size * sizeof(char));
+          if (data == NULL) {
+            die("Error allocating memory.\n");
+          }
+          fread(data, sizeof(char), size, file);
+
+          // Copy each line of the file into the rows of LOGO
+          int row = 0;
+          int col = 0;
+          for (int i = 0; i < size; i++) {
+            if (data[i] == '\n') {
+              // End of line, move to next row
+              row++;
+              col = 0;
+            } else if (row < num_rows && col < num_cols) {
+              // Copy character into matrix
+              LOGO[row][col] = data[i];
+              col++;
+            }
+          }
+
+          //         strncpy(LOGO, data, 1024);
+
+          fclose(file);
+          // Now the file contents are stored in data[].
+          free(data);
+        }*/
         if (strcmp(trimmed_key, "prompt") == 0) {
           char *trimmed_value = trim_garbage(value);
           strncpy(WELCOME_PROMPT, trimmed_value, sizeof(WELCOME_PROMPT));
@@ -196,6 +260,7 @@ void load_config() {
           char *trimmed_value = trim_garbage(value);
           TAB_LENGTH = (size_t)atoi(trimmed_value);
         }
+        // TODO(mihai): BROKEN, WIP
         if (strcmp(trimmed_key, "quit-cnt") == 0) {
           char *trimmed_value = trim_garbage(value);
           QUIT_CNT = (size_t)atoi(trimmed_value);
@@ -221,11 +286,14 @@ char *C_HL_keywords[] = {"switch",    "if",      "while",   "for",    "break",
 
                          "int|",      "long|",   "double|", "float|", "char|",
                          "unsigned|", "signed|", "void|",   NULL};
+char *TAU_HL_extensions[] = {".tau", NULL};
+char *TAU_HL_keywords[] = {"prompt", "line-format", "tab-length"};
 
 struct editorSyntax HLDB[] = {
     {"c", C_HL_extensions, C_HL_keywords, "//", "/*", "*/",
      HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS},
-};
+    {"tau", TAU_HL_extensions, TAU_HL_keywords, "#", "##", "###",
+     HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS}};
 
 #define HLDB_ENTRIES (sizeof(HLDB) / sizeof(HLDB[0]))
 
@@ -553,7 +621,7 @@ int editorRowCxToRx(erow *row, int cx) {
   int j;
   for (j = 0; j < cx; j++) {
     if (row->chars[j] == '\t')
-      rx += (TAU_TAB_STOP - 1) - (rx % TAU_TAB_STOP);
+      rx += (TAB_LENGTH - 1) - (rx % TAB_LENGTH);
     rx++;
   }
   return rx;
@@ -564,7 +632,7 @@ int editorRowRxToCx(erow *row, int rx) {
   int cx;
   for (cx = 0; cx < row->size; cx++) {
     if (row->chars[cx] == '\t')
-      cur_rx += (TAU_TAB_STOP - 1) - (cur_rx % TAU_TAB_STOP);
+      cur_rx += (TAB_LENGTH - 1) - (cur_rx % TAB_LENGTH);
     cur_rx++;
 
     if (cur_rx > rx)
@@ -581,13 +649,13 @@ void editorUpdateRow(erow *row) {
       tabs++;
 
   free(row->render);
-  row->render = malloc(row->size + tabs * (TAU_TAB_STOP - 1) + 1);
+  row->render = malloc(row->size + tabs * (TAB_LENGTH - 1) + 1);
 
   int idx = 0;
   for (j = 0; j < row->size; j++) {
     if (row->chars[j] == '\t') {
       row->render[idx++] = ' ';
-      while (idx % TAU_TAB_STOP != 0)
+      while (idx % TAB_LENGTH != 0)
         row->render[idx++] = ' ';
     } else {
       row->render[idx++] = row->chars[j];
@@ -918,8 +986,21 @@ void editorDrawRows(struct abuf *ab) {
         char welcome[80];
         int welcomelen =
             snprintf(welcome, sizeof(welcome), WELCOME_PROMPT, TAU_VERSION);
+
+        // FIXME(mihai)
+        /*
+                for (int i = 0; i < 21; i++) {
+                  int logolen = strlen(LOGO[i]);
+                  if (logolen > E.screencols)
+                    logolen = E.screencols;
+                  abAppend(ab, LOGO[i], logolen);
+                  abAppend(ab, "\n", 1);
+                }*/
+
+        // END OF FIXME
         if (welcomelen > E.screencols)
           welcomelen = E.screencols;
+
         int padding = (E.screencols - welcomelen) / 2;
         if (padding) {
           abAppend(ab, "~", 1);
@@ -1153,6 +1234,8 @@ void editorMoveCursor(int key) {
   }
 }
 
+void initEditor();
+
 void editorProcessKeypress() {
   static int quit_times = TAU_QUIT_TIMES;
 
@@ -1227,6 +1310,27 @@ void editorProcessKeypress() {
   case '\x1b':
     break;
 
+    // TODO(mihai): It works, but move it to a leader (space) + h or something
+    // config
+  case CTRL_KEY('p'):
+    editorSetStatusMessage("HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = "
+                           "find | Ctrl-E = open file");
+    break;
+  // TODO(mihai): Add file opening, this shit is broken atm.
+  case CTRL_KEY('e'): {
+    char *file_path;
+    file_path = editorPrompt("Open file %s", NULL);
+    if (file_path != NULL)
+      // TODO(mihai): Add else statement with file checking so the program
+      // doesn't crash due to fopen.
+      // BUG! Clear screen first!
+      // dumb idea below
+      initEditor();
+    editorOpen(file_path);
+
+    break;
+  }
+
   default:
     editorInsertChar(c);
     break;
@@ -1266,6 +1370,8 @@ int main(int argc, char *argv[]) {
   if (argc >= 2) {
     editorOpen(argv[1]);
   }
+  // TODO(mihai): Add else statement with file checking so the program doesn't
+  // crash due to fopen.
 
   editorSetStatusMessage("HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = find");
 
