@@ -977,6 +977,8 @@ void editorScroll() {
   }
 }
 
+void editorDrawHelpBar(struct abuf *ab);
+
 void editorDrawRows(struct abuf *ab) {
   int y;
   for (y = 0; y < E.screenrows; y++) {
@@ -1009,6 +1011,9 @@ void editorDrawRows(struct abuf *ab) {
         while (padding--)
           abAppend(ab, " ", 1);
         abAppend(ab, welcome, welcomelen);
+
+        // TODO
+        //      editorDrawHelpBar(ab);
       } else {
         abAppend(ab, "~", 1);
       }
@@ -1120,6 +1125,97 @@ void editorDrawMessageBar(struct abuf *ab) {
     abAppend(ab, E.statusmsg, msglen);
 }
 
+// FIXME TODO(MIHAI): HACKY
+/*void editorDrawHelpBar(struct abuf *ab) {
+  // Set the background color to gray
+  abAppend(ab, "\x1b[48;5;235m", 12);
+
+  // Clear the line and move the cursor to the beginning
+  abAppend(ab, "\x1b[K", 3);
+
+  // Set the text color to a suitable color for the help message
+  abAppend(ab, "\x1b[38;5;15m", 12);
+
+  int msglen = strlen(E.statusmsg);
+  if (msglen > E.screencols)
+    msglen = E.screencols;
+  if (msglen && time(NULL) - E.statusmsg_time < 5)
+    abAppend(ab, E.statusmsg, msglen);
+
+  // Reset colors and attributes to default
+  abAppend(ab, "\x1b[0m", 4);
+  abAppend(ab, "\n", 1);
+}
+void editorDrawHelpMenu(struct abuf *ab) {
+  int numRows = 3;
+  int numCols = 3;
+  int optionWidth = E.screencols / numCols;
+  int helpTextSize = 6; // Total number of help options
+
+  // Calculate the starting row and column for the help menu above the status
+  // bar
+  int startRow = E.screenrows - numRows - 1;
+  int startCol = 0;
+
+  // Define an array of ANSI color codes for the options
+  char *optionColors[] = {
+      "\x1b[31m", // Red
+      "\x1b[32m", // Green
+      "\x1b[33m", // Yellow
+      "\x1b[34m", // Blue
+      "\x1b[35m", // Magenta
+      "\x1b[36m"  // Cyan
+  };
+
+  // Define the help text for each option
+  char *helpText[] = {"Option 1 Help", "Option 2 Help", "Option 3 Help",
+                      "Option 4 Help", "Option 5 Help", "Option 6 Help"};
+
+  // Calculate the width of each option
+  int optionLength = E.screencols / helpTextSize;
+
+  // Set the background color to gray for the entire help menu
+  abAppend(ab, "\x1b[48;5;235m", 9);
+
+  // Loop through the rows and options to draw the help menu
+  for (int row = 0; row < numRows; row++) {
+    int y = startRow + row;
+    for (int optionIndex = row; optionIndex < helpTextSize;
+         optionIndex += numRows) {
+      char *option = helpText[optionIndex];
+
+      // Calculate the starting column for this option
+      int x = startCol + (optionIndex - row) * optionLength;
+
+      // Set the cursor position
+      char buf[32];
+      snprintf(buf, sizeof(buf), "\x1b[%d;%dH", y + 1, x + 1);
+      abAppend(ab, buf, strlen(buf));
+
+      // Set the color for the option
+      abAppend(ab, optionColors[optionIndex % 6],
+               strlen(optionColors[optionIndex % 6]));
+
+      // Append the option text
+      abAppend(ab, option, strlen(option));
+    }
+
+    // Reset colors and attributes to default
+    abAppend(ab, "\x1b[0m", 4);
+
+    abAppend(ab, "\n", 1);
+    // Fill the remaining space with spaces
+    int remainingSpace =
+        E.screencols - (startCol + optionLength * helpTextSize);
+    if (remainingSpace > 0) {
+      for (int i = 0; i < remainingSpace; i++) {
+        abAppend(ab, " ", 1);
+      }
+    }
+
+  }
+}*/
+
 void editorRefreshScreen() {
   editorScroll();
 
@@ -1129,8 +1225,12 @@ void editorRefreshScreen() {
   abAppend(&ab, "\x1b[H", 3);
 
   editorDrawRows(&ab);
+
+  // editorDrawHelpMenu(&ab);
   editorDrawStatusBar(&ab);
   editorDrawMessageBar(&ab);
+
+  // HACKY TODO(mihai)
 
   char buf[32];
   snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.rowoff) + 1,
@@ -1144,6 +1244,15 @@ void editorRefreshScreen() {
 }
 
 void editorSetStatusMessage(const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(E.statusmsg, sizeof(E.statusmsg), fmt, ap);
+  va_end(ap);
+  E.statusmsg_time = time(NULL);
+}
+
+/*** TODO(mihai): Non-hacky way ***/
+void editorSetHelpMessage(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   vsnprintf(E.statusmsg, sizeof(E.statusmsg), fmt, ap);
@@ -1314,7 +1423,7 @@ void editorProcessKeypress() {
     // config
   case CTRL_KEY('p'):
     editorSetStatusMessage("HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = "
-                           "find | Ctrl-E = open file");
+                           "find | Ctrl-E = open file | Ctrl-P = display help");
     break;
   // TODO(mihai): Add file opening, this shit is broken atm.
   case CTRL_KEY('e'): {
@@ -1373,7 +1482,8 @@ int main(int argc, char *argv[]) {
   // TODO(mihai): Add else statement with file checking so the program doesn't
   // crash due to fopen.
 
-  editorSetStatusMessage("HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = find");
+  editorSetStatusMessage("HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = find "
+                         "| Ctrl-E = open file | Ctrl-P = show help");
 
   while (1) {
     editorRefreshScreen();
